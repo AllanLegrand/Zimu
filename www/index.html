@@ -2,22 +2,12 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>Zig WASM Demo</title>
-		<style>
-body { font-family: Arial, sans-serif; padding: 20px; }
-#result { font-size: 1.5em; margin: 20px 0; }
-		</style>
+		<title>Particle Life</title>
+		<link rel="stylesheet" href="styles.css">
 	</head>
 	<body>
-		<h1>Zig + WebAssembly Demo</h1>
-
-		<input type="number" id="a" value="5" style="width:100px">
-		+
-		<input type="number" id="b" value="7" style="width:100px">
-		<button onclick="calculate()">Calculate</button>
-
-		<div id="result"></div>
+		<h2>Particle Life</h2>
+		<canvas id="canvas" width="800" height="800"></canvas>
 
 		<script src="script.js"></script>
 	</body>

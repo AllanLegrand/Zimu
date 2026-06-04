@@ -1,19 +1,104 @@
 const std = @import("std");
 
-export fn add(a: i32, b: i32) i32 {
-	return a + b;
+pub const Particle = extern struct {
+	x: f32,
+	y: f32,
+	vx: f32,
+	vy: f32,
+	kind: i32,
+};
+
+const num_particles = 1500;
+const num_types = 4;
+var particles: [num_particles]Particle = undefined;
+var rules: [num_types][num_types]f32 = undefined;
+
+const width: f32 = 800.0;
+const height: f32 = 800.0;
+const max_radius: f32 = 60.0;
+const min_radius: f32 = 15.0;
+const friction: f32 = 0.5;
+const dt: f32 = 0.05;
+
+var prng: std.Random.DefaultPrng = undefined;
+
+export fn init(seed: u64) void {
+	prng = std.Random.DefaultPrng.init(seed);
+	const random = prng.random();
+
+	for (0..num_types) |i| {
+		for (0..num_types) |j| {
+			rules[i][j] = (random.float(f32) * 2.0) - 1.0;
+		}
+	}
+
+	for (0..num_particles) |i| {
+		particles[i] = Particle{
+			.x = random.float(f32) * width,
+			.y = random.float(f32) * height,
+			.vx = 0,
+			.vy = 0,
+			.kind = @as(i32, @intCast(i % num_types)),
+		};
+	}
 }
 
-export fn greet(name_ptr: [*]const u8, name_len: usize) void {
-	_ = name_ptr;
-	_ = name_len;
+export fn step() void {
+	for (0..num_particles) |i| {
+		var fx: f32 = 0;
+		var fy: f32 = 0;
+		const p1 = &particles[i];
+
+		for (0..num_particles) |j| {
+			if (i == j) continue;
+			const p2 = &particles[j];
+
+			var dx = p2.x - p1.x;
+			var dy = p2.y - p1.y;
+
+			if (dx > width / 2.0) dx -= width;
+			if (dx < -width / 2.0) dx += width;
+			if (dy > height / 2.0) dy -= height;
+			if (dy < -height / 2.0) dy += height;
+
+			const dist_sq = dx * dx + dy * dy;
+			if (dist_sq > 0 and dist_sq < max_radius * max_radius) {
+				const dist = @sqrt(dist_sq);
+				var force: f32 = 0;
+
+				if (dist < min_radius) {
+					force = (dist / min_radius) - 1.0; 
+				} else {
+					const rule = rules[@as(usize, @intCast(p1.kind))][@as(usize, @intCast(p2.kind))];
+					const normalized_dist = (dist - min_radius) / (max_radius - min_radius);
+					force = rule * (1.0 - @abs(2.0 * normalized_dist - 1.0));
+				}
+
+				fx += (dx / dist) * force;
+				fy += (dy / dist) * force;
+			}
+		}
+
+		p1.vx = (p1.vx + fx * dt) * friction;
+		p1.vy = (p1.vy + fy * dt) * friction;
+	}
+
+	for (0..num_particles) |i| {
+		const p = &particles[i];
+		p.x += p.vx;
+		p.y += p.vy;
+
+		if (p.x < 0) p.x += width;
+		if (p.x >= width) p.x -= width;
+		if (p.y < 0) p.y += height;
+		if (p.y >= height) p.y -= height;
+	}
 }
 
-export fn alloc(size: usize) ?[*]u8 {
-	const slice = std.heap.page_allocator.alloc(u8, size) catch return null;
-	return slice.ptr;
+export fn get_particles() [*]Particle {
+	return &particles;
 }
 
-export fn dealloc(ptr: [*]u8, size: usize) void {
-	std.heap.page_allocator.free(ptr[0..size]);
+export fn get_count() i32 {
+	return num_particles;
 }
