@@ -1,6 +1,6 @@
 const canvas = document.getElementById('simulationCanvas');
 const ctx = canvas.getContext('2d');
-const colors = ['#ff3366', '#33ccff', '#33ff66', '#ffcc00'];
+const colors = ['#ff3367', '#33ccff', '#33ff66', '#ffcc00'];
 
 let scale = 0.5; 
 let offsetX = window.innerWidth / 2;
