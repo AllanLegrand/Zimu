@@ -53,13 +53,9 @@ export fn step() void {
 			if (i == j) continue;
 			const p2 = &particles[j];
 
-			var dx = p2.x - p1.x;
-			var dy = p2.y - p1.y;
+			const dx = p2.x - p1.x;
+			const dy = p2.y - p1.y;
 
-			if (dx > width / 2.0) dx -= width;
-			if (dx < -width / 2.0) dx += width;
-			if (dy > height / 2.0) dy -= height;
-			if (dy < -height / 2.0) dy += height;
 
 			const dist_sq = dx * dx + dy * dy;
 			if (dist_sq > 0 and dist_sq < max_radius * max_radius) {
@@ -79,6 +75,9 @@ export fn step() void {
 			}
 		}
 
+		fx -= p1.x * 0.0001;
+		fy -= p1.y * 0.0001;
+
 		p1.vx = (p1.vx + fx * dt) * friction;
 		p1.vy = (p1.vy + fy * dt) * friction;
 	}
@@ -88,10 +87,6 @@ export fn step() void {
 		p.x += p.vx;
 		p.y += p.vy;
 
-		if (p.x < 0) p.x += width;
-		if (p.x >= width) p.x -= width;
-		if (p.y < 0) p.y += height;
-		if (p.y >= height) p.y -= height;
 	}
 }
 
